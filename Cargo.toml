@@ -1,0 +1,20 @@
+[package]
+name="rotations"
+edition = "2021"
+version = "0.1.0"
+
+[lib]
+name="rotations"
+
+[dependencies]
+num-traits = "0.2.15"
+ndarray = {version="0.15.6", optional=true}
+
+
+[dev-dependencies]
+# for tests
+rand = "0.8.5"
+
+[features]
+default = ["ndarrbindings"]
+ndarrbindings = ["ndarray"]
