@@ -40,6 +40,11 @@ where
         }
     }
 
+    // Quaternion from in put vector and scalar values
+    pub fn from_vals(x: T, y: T, z: T, w: T) -> Quaternion<T> {
+        Quaternion::<T> { raw: [x, y, z, w] }
+    }
+
     /// Quaternion from input axis & angle
     pub fn from_axis_angle(axis: Vec3<T>, angle: T) -> Quaternion<T> {
         let n = (axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]).sqrt();
@@ -393,6 +398,68 @@ mod tests {
     #[allow(unused)]
     use super::*;
 
+    // reference left matrix multiply implementation
+    fn left_mmult(m: &[[f64; 3]; 3], v: &[f64; 3]) -> [f64; 3] {
+        m.map(|x| x[0] * v[0] + x[1] * v[1] + x[2] * v[2])
+    }
+
+    // reference right matrix multiply implementation
+    fn right_mmult(v: &[f64; 3], m: &[[f64; 3]; 3]) -> [f64; 3] {
+        [
+            v[0] * m[0][0] + v[1] * m[1][0] + v[2] * m[2][0],
+            v[0] * m[0][1] + v[1] * m[1][1] + v[2] * m[2][1],
+            v[0] * m[0][2] + v[1] * m[1][2] + v[2] * m[2][2],
+        ]
+    }
+
+    #[test]
+    fn qrot() {
+        let mut idx = 0;
+        while idx < 1000 {
+            // Create a random quaternion
+            let mut q = QuaternionD::from_vals(
+                rand::random::<f64>() - 0.5,
+                rand::random::<f64>() - 0.5,
+                rand::random::<f64>() - 0.5,
+                rand::random::<f64>() - 0.5,
+            );
+            q.normalize();
+
+            // Create a random vector
+            let mut v = [
+                rand::random::<f64>() - 0.5,
+                rand::random::<f64>() - 0.5,
+                rand::random::<f64>() - 0.5,
+            ];
+            // Normalize vector
+            let vn = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt();
+            v = v.map(|x| x / vn);
+
+            // Rotate via quaternion
+            let vr1 = q * v.clone();
+
+            // Rotate via left multiplication of equivalent DCM
+            let vr2 = left_mmult(&q.ldcm(), &v);
+
+            // Check that quaternion & left multiplication of DCM
+            // are identical
+            vr1.iter()
+                .zip(vr2)
+                .for_each(|(x, y)| assert!((x - y).abs() < 1.0e-7));
+
+            // Rotate via right multiplication of equivalent DCM
+            let vr3 = right_mmult(&v, &q.rdcm());
+            // Check that quaternion & right multiplication of DCM
+            // are identical
+            vr1.iter()
+                .zip(vr3)
+                .for_each(|(x, y)| assert!((x - y).abs() < 1.0e-7));
+
+            idx = idx + 1;
+        }
+    }
+
+    // Check that to & from DCM are consistent
     #[test]
     fn q2dcm2q() {
         // Create random quaternion
@@ -400,13 +467,11 @@ mod tests {
         let mut idx = 0;
         while idx < 1000 {
             // Create a random quaternion
-            let mut q = QuaternionD::from_axis_angle(
-                [
-                    rand::random::<f64>() - 0.5,
-                    rand::random::<f64>() - 0.5,
-                    rand::random::<f64>() - 0.5,
-                ],
-                rand::random::<f64>() * std::f64::consts::PI,
+            let mut q = QuaternionD::from_vals(
+                rand::random::<f64>() - 0.5,
+                rand::random::<f64>() - 0.5,
+                rand::random::<f64>() - 0.5,
+                rand::random::<f64>() - 0.5,
             );
             q.normalize();
 
