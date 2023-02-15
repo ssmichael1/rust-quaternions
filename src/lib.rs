@@ -6,7 +6,7 @@ mod quaternion;
 mod qoperators;
 
 #[cfg(any(feature = "ndarray", feature = "python"))]
-mod qndarray;
+pub mod qndarray;
 
 #[cfg(feature = "python")]
 pub mod qnumpy;

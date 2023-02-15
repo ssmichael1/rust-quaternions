@@ -149,22 +149,25 @@ where
             v1[2] * v2[0] - v1[0] * v2[2],
             v1[0] * v2[1] - v1[1] * v2[0],
         ];
-        // Dot product is cosine of angle between vectors
-        let vd: T = v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
+        let w = ((v1[0] * v1[0] + v1[1] * v1[1] + v1[2] * v1[2])
+            * (v2[0] * v2[0] + v2[1] * v2[1] + v2[2] * v2[2]))
+            .sqrt()
+            + v1[0] * v2[0]
+            + v1[1] * v2[1]
+            + v1[2] * v2[2];
+
         // norm of cross product is sin of angle between vectors
         let cn = (vc[0] * vc[0] + vc[1] * vc[1] + vc[2] * vc[2]).sqrt();
+
         // Return identity if cross product magnitude is zero
         // (vectors are parallel)
         if cn == Zero::zero() {
             return Quaternion::<T>::identity();
         }
-        let theta = (cn / vd).atan();
-        let thetaover2 = T::from(0.5).unwrap() * theta;
-        let ct = thetaover2.cos();
-        let st = thetaover2.sin();
         Quaternion::<T> {
-            raw: [vc[0] / cn * st, vc[1] / cn * st, vc[2] / cn * st, ct],
+            raw: [vc[0], vc[1], vc[2], w],
         }
+        .normalized()
     }
 
     /// Return vector component of quaternion
@@ -388,7 +391,6 @@ impl<T> fmt::Display for Quaternion<T>
 where
     T: Float,
 {
-    // This trait requires `fmt` with this exact signature.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let (ax, angle) = self.axis_angle();
         write!(
@@ -464,6 +466,42 @@ mod tests {
             vr1.iter()
                 .zip(vr3)
                 .for_each(|(x, y)| assert!((x - y).abs() < 1.0e-7));
+
+            idx = idx + 1;
+        }
+    }
+
+    // Check that qv1tov2 is correct
+    #[test]
+    fn qv1tov2() {
+        let mut idx: usize = 0;
+
+        fn vnorm(v: &[f64; 3]) -> f64 {
+            (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt()
+        }
+
+        fn vdot(v1: &[f64; 3], v2: &[f64; 3]) -> f64 {
+            v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]
+        }
+
+        while idx < 1000 {
+            let v1 = [
+                rand::random::<f64>() - 0.5,
+                rand::random::<f64>() - 0.5,
+                rand::random::<f64>() - 0.5,
+            ];
+            let v2 = [
+                rand::random::<f64>() - 0.5,
+                rand::random::<f64>() - 0.5,
+                rand::random::<f64>() - 0.5,
+            ];
+
+            let q = QuaternionD::qv1tov2(&v1, &v2);
+            let v3 = q * v1;
+
+            // Check that the dot product (cosine) of the now-aligned vectors
+            // is near unity (angle between them is zero)s
+            assert!(((vdot(&v2, &v3) / vnorm(&v2) / vnorm(&v3)) - 1.0).abs() < 1.0e-7);
 
             idx = idx + 1;
         }
