@@ -122,7 +122,7 @@ mod tests {
 
             // Create a random quaternion
             let mut q = QuaternionD::from_axis_angle(
-                [
+                &[
                     rand::random::<f64>() - 0.5,
                     rand::random::<f64>() - 0.5,
                     rand::random::<f64>() - 0.5,

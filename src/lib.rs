@@ -1,10 +1,15 @@
-#[cfg(feature = "ndarrbindings")]
-mod qndarray;
-mod qoperators;
 ///
 /// Define rotations
 ///
 mod quaternion;
+
+mod qoperators;
+
+#[cfg(any(feature = "ndarray", feature = "python"))]
+mod qndarray;
+
+#[cfg(feature = "python")]
+pub mod qnumpy;
 
 pub use quaternion::Quaternion;
 pub use quaternion::Vec3;

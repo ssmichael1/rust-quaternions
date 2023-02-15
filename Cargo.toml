@@ -1,20 +1,22 @@
 [package]
-name="rotations"
+name="quaternion"
 edition = "2021"
 version = "0.1.0"
 
 [lib]
-name="rotations"
+name = "quaternion"
 
 [dependencies]
 num-traits = "0.2.15"
 ndarray = {version="0.15.6", optional=true}
-
+numpy = {version = "0.18.0", optional=true}
+pyo3 = {version="0.18.1", features=["extension-module"], optional=true}
 
 [dev-dependencies]
 # for tests
 rand = "0.8.5"
 
 [features]
-default = ["ndarrbindings"]
-ndarrbindings = ["ndarray"]
+default = []
+ndarray = ["dep:ndarray"]
+python = ["dep:ndarray", "dep:numpy", "dep:pyo3"]

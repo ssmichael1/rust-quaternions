@@ -3,7 +3,7 @@ use num_traits::{Float, One, Zero};
 use std::fmt;
 
 /// Quaternion to represent rotations of 3D vectors
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Quaternion<T>
 where
     T: Float,
@@ -46,7 +46,7 @@ where
     }
 
     /// Quaternion from input axis & angle
-    pub fn from_axis_angle(axis: Vec3<T>, angle: T) -> Quaternion<T> {
+    pub fn from_axis_angle(axis: &[T; 3], angle: T) -> Quaternion<T> {
         let n = (axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]).sqrt();
         if n == Zero::zero() {
             return Quaternion::<T>::identity();
@@ -198,6 +198,15 @@ where
             + self.raw[2] * self.raw[2]
             + self.raw[3] * self.raw[3])
             .sqrt()
+    }
+
+    /// Square of Quaternion norm
+    #[inline(always)]
+    pub fn normsq(&self) -> T {
+        self.raw[0] * self.raw[0]
+            + self.raw[1] * self.raw[1]
+            + self.raw[2] * self.raw[2]
+            + self.raw[3] * self.raw[3]
     }
 
     /// Normalize quaternion in-place
@@ -412,6 +421,7 @@ mod tests {
         ]
     }
 
+    /// Test that qusternions do the correct rotation
     #[test]
     fn qrot() {
         let mut idx = 0;
