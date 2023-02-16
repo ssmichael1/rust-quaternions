@@ -2,6 +2,8 @@ use crate::{Quaternion, Vec3};
 use num_traits::{Float, Zero};
 use std::ops::{Add, Mul};
 
+use crate::QuaternionError;
+
 #[inline(always)]
 pub(crate) fn raw_qmult<T>(q1: [T; 4], q2: [T; 4]) -> [T; 4]
 where
@@ -264,6 +266,26 @@ where
         };
         let q = self * qv * self.conjugate();
         q.vector()
+    }
+}
+
+// Non-operator rotations
+impl<T> Quaternion<T>
+where
+    T: Float,
+{
+    /// Rotate slice with error checking
+    pub fn rotate_slice(&self, s: &[T]) -> Result<[T; 3], QuaternionError> {
+        if s.len() != 3 {
+            Err(QuaternionError::new("Slice to rotate must have 3 elements"))
+        } else {
+            Ok(self * s)
+        }
+    }
+
+    /// Rotate 3-element array
+    pub fn rotate_array(&self, s: &[T; 3]) -> [T; 3] {
+        self * s
     }
 }
 

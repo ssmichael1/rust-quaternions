@@ -5,11 +5,15 @@ mod quaternion;
 
 mod qoperators;
 
+mod quaternionerror;
+
 #[cfg(any(feature = "ndarray", feature = "python"))]
 pub mod qndarray;
 
 #[cfg(feature = "python")]
 pub mod qnumpy;
+
+pub use quaternionerror::QuaternionError;
 
 pub use quaternion::Quaternion;
 pub use quaternion::Vec3;
