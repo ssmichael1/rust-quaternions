@@ -500,7 +500,7 @@ mod tests {
             let v3 = q * v1;
 
             // Check that the dot product (cosine) of the now-aligned vectors
-            // is near unity (angle between them is zero)s
+            // is near unity (angle between them is zero)
             assert!(((vdot(&v2, &v3) / vnorm(&v2) / vnorm(&v3)) - 1.0).abs() < 1.0e-7);
 
             idx = idx + 1;

@@ -36,7 +36,18 @@ impl Quaternion {
     #[new]
     fn py_new() -> PyResult<Self> {
         Ok(Quaternion {
-            inner: Quat::from_axis_angle(&[1.0, 0.0, 0.0], 0.0),
+            inner: Quat::from_vals(0.0, 0.0, 0.0, 1.0),
+        })
+    }
+
+    ///
+    /// Default identity quaternion:
+    /// Rotation about xhat axis by 0 radians
+    ///
+    #[staticmethod]
+    fn identity() -> PyResult<Self> {
+        Ok(Quaternion {
+            inner: Quat::from_vals(0.0, 0.0, 0.0, 1.0),
         })
     }
 
@@ -95,6 +106,25 @@ impl Quaternion {
 
         Ok(Quaternion {
             inner: Quat::from_axis_angle(&[ax[0], ax[1], ax[2]], angle),
+        })
+    }
+
+    /// Return Quaternion that rotates  from input vector v1 to input vector v2
+    #[staticmethod]
+    fn qv1tov2(v1: np::PyReadonlyArray1<f64>, v2: np::PyReadonlyArray1<f64>) -> PyResult<Self> {
+        if v1.len() != 3 || v2.len() != 3 {
+            return Err(pyo3::exceptions::PyValueError::new_err(
+                "Input vectors must each have 3 elements",
+            ));
+        }
+
+        let mut vv1: [f64; 3] = Default::default();
+        let mut vv2: [f64; 3] = Default::default();
+        vv1.copy_from_slice(v1.as_slice().unwrap());
+        vv2.copy_from_slice(v2.as_slice().unwrap());
+
+        Ok(Quaternion {
+            inner: Quat::qv1tov2(&vv1, &vv2),
         })
     }
 
@@ -174,17 +204,21 @@ impl Quaternion {
     ///    Return Nx3 2D numpy array where each column is
     ///    rotated by the LHS quaternion
     ///
-    /// 4. Floating point scalar
+    /// 4. 3-element list of integers or floats
+    ///    Return 3-element list of floating point representing
+    ///    rotation of input list by LHS quaternion
+    ///
+    /// 5. Floating point scalar
     ///    Return LHS quaternion multiplied by scalar
     ///    (generally this is not done...)
     ///
     fn __mul__(&self, other: &PyAny) -> PyResult<PyObject> {
         // Multiply quaternion by quaternion
         if other.is_instance_of::<Quaternion>().unwrap() {
-            let q: PyRef<Quaternion> = other.extract()?;
+            let q: Quat = Quat::try_from(other)?;
             pyo3::Python::with_gil(|py| -> PyResult<PyObject> {
                 return Ok(Quaternion {
-                    inner: self.inner * q.inner,
+                    inner: self.inner * q,
                 }
                 .into_py(py));
             })
@@ -235,6 +269,21 @@ impl Quaternion {
                 }
                 .into_py(py));
             });
+        } else if other.is_instance_of::<pyo3::types::PyList>().unwrap() {
+            let l = other.downcast::<pyo3::types::PyList>().unwrap();
+            if l.len() != 3 {
+                return Err(pyo3::exceptions::PyTypeError::new_err(
+                    "RHS list must have 3 elements",
+                ));
+            }
+            let mut v = [0.0, 0.0, 0.0];
+            v[0] = l.get_item(0).unwrap().extract::<f64>().unwrap();
+            v[1] = l.get_item(1).unwrap().extract::<f64>().unwrap();
+            v[2] = l.get_item(2).unwrap().extract::<f64>().unwrap();
+            let v2 = self.inner * v;
+            pyo3::Python::with_gil(|py| -> PyResult<PyObject> {
+                Ok(pyo3::types::PyList::new(py, v2).into_py(py))
+            })
         } else {
             Err(pyo3::exceptions::PyTypeError::new_err("Invalid rhs"))
         }
@@ -245,4 +294,41 @@ impl Quaternion {
 pub fn quaternion(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<Quaternion>()?;
     Ok(())
+}
+
+impl TryFrom<&PyAny> for Quat {
+    type Error = PyErr;
+    fn try_from(p: &PyAny) -> Result<Quat, PyErr> {
+        if !p.is_instance_of::<Quaternion>().unwrap() {
+            return Err(pyo3::exceptions::PyTypeError::new_err(
+                "Input must be Quaternion",
+            ));
+        } else {
+            Ok(p.extract::<Quaternion>().unwrap().inner)
+        }
+    }
+}
+
+impl From<Quat> for Quaternion {
+    fn from(q: Quat) -> Quaternion {
+        Quaternion { inner: q }
+    }
+}
+
+impl From<&Quat> for Quaternion {
+    fn from(q: &Quat) -> Quaternion {
+        Quaternion { inner: q.clone() }
+    }
+}
+
+impl From<Quaternion> for Quat {
+    fn from(q: Quaternion) -> Quat {
+        q.inner
+    }
+}
+
+impl From<&Quaternion> for Quat {
+    fn from(q: &Quaternion) -> Quat {
+        q.inner
+    }
 }
