@@ -1,3 +1,4 @@
+/// Quaternion bindings for NumPy (creates a python library)
 use crate::QuaternionD as Quat;
 
 use np::convert::ToPyArray;

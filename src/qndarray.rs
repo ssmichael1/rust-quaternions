@@ -84,7 +84,7 @@ impl<T> Quaternion<T>
 where
     T: Float,
 {
-    /// Return Direction-Cosine-Matric (DCM) which when
+    /// Return Direction-Cosine-Matrix (DCM) which when
     /// left multiplied by 3x1 row-vector matches rotation of
     /// input quaternion.  Return type is Array2 from
     /// ndarray crate
@@ -92,7 +92,7 @@ where
         ndarray::arr2(self.ldcm().as_slice())
     }
 
-    /// Return Direction-Cosine-Matric (DCM) which when
+    /// Return Direction-Cosine-Matrix (DCM) which when
     /// right multiplied by 1x3 column-vector matches rotation of
     /// input quaternion.  Return type is Array2 from
     /// ndarray crate
