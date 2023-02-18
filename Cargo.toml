@@ -1,14 +1,16 @@
 [package]
 name="qrotate"
 edition = "2021"
-version = "0.1.0"
+version = "0.2.0"
 authors = [ "Steven Michael <ssmichael@gmail.com>"]
 description = "Quaternion library for 3D rotation of vectors"
 license = "Apache-2.0"
 readme = "README.md"
 categories = [ "science", "mathematics" ]
 keywords = [ "algebra", "matrix", "vector", "rotation", "quaternion", "math", "ndarray"]
-
+repository = "https://github.com/StevenSamirMichael/rust-quaternions"
+homepage = "https://github.com/StevenSamirMichael/rust-quaternions"
+docs = "https://docs.rs/qrotate/"
 
 
 [lib]
@@ -25,7 +27,7 @@ pyo3 = {version="0.18.1", features=["extension-module"], optional=true}
 rand = "0.8.5"
 
 [features]
-default = ["python"]
+default = ["ndarray"]
 ndarray = ["dep:ndarray"]
 python = ["dep:ndarray", "dep:numpy", "dep:pyo3"]
 
