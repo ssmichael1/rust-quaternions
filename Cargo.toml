@@ -2,6 +2,14 @@
 name="quaternion"
 edition = "2021"
 version = "0.1.0"
+authors = [ "Steven Michael <ssmichael@gmail.com>"]
+description = "Quaternion library for 3D rotation of vectors"
+license = "Apache-2.0"
+readme = "README.md"
+categories = [ "science", "mathematics" ]
+keywords = [ "algebra", "matrix", "vector", "rotation", "quaternion", "math" ]
+
+
 
 [lib]
 name = "quaternion"
@@ -20,3 +28,7 @@ rand = "0.8.5"
 default = ["python"]
 ndarray = ["dep:ndarray"]
 python = ["dep:ndarray", "dep:numpy", "dep:pyo3"]
+
+[package.metadata.docs.rs]
+# Enable all the features when building the docs on docs.rs
+all-features = true
