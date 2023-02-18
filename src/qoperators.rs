@@ -178,13 +178,25 @@ where
     }
 }
 
-// Reference quaternion rotation of 3D vector represented as std::vec::Vec
-impl<'a, T> Mul<std::vec::Vec<T>> for &'a Quaternion<T>
+// Quaternion rotation of 3D vector represented as &std::vec::Vec
+impl<'a, T> Mul<&'a std::vec::Vec<T>> for Quaternion<T>
 where
     T: Float,
 {
     type Output = std::vec::Vec<T>;
-    fn mul(self, rhs: std::vec::Vec<T>) -> Self::Output {
+    fn mul(self, rhs: &'a std::vec::Vec<T>) -> Self::Output {
+        assert!(rhs.len() == 3);
+        std::vec::Vec::<T>::from(self * rhs.as_slice())
+    }
+}
+
+// Reference quaternion rotation of 3D vector represented as std::vec::Vec
+impl<'a, 'b, T> Mul<&'b std::vec::Vec<T>> for &'a Quaternion<T>
+where
+    T: Float,
+{
+    type Output = std::vec::Vec<T>;
+    fn mul(self, rhs: &'b std::vec::Vec<T>) -> Self::Output {
         assert!(rhs.len() == 3);
         std::vec::Vec::<T>::from(self * rhs.as_slice())
     }

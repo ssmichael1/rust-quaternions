@@ -1,5 +1,5 @@
 [package]
-name="quaternion"
+name="qrotate"
 edition = "2021"
 version = "0.1.0"
 authors = [ "Steven Michael <ssmichael@gmail.com>"]
@@ -7,12 +7,12 @@ description = "Quaternion library for 3D rotation of vectors"
 license = "Apache-2.0"
 readme = "README.md"
 categories = [ "science", "mathematics" ]
-keywords = [ "algebra", "matrix", "vector", "rotation", "quaternion", "math" ]
+keywords = [ "algebra", "matrix", "vector", "rotation", "quaternion", "math", "ndarray"]
 
 
 
 [lib]
-name = "quaternion"
+name = "qrotate"
 
 [dependencies]
 num-traits = "0.2.15"

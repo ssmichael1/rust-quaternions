@@ -1,5 +1,9 @@
 ///
-/// Define rotations
+/// The qrotate crate provides Quaternion representations of rotations
+/// of 3-element vectors representing points in 3-dimensional space.
+/// 3-element vectors can use rust standard library types,
+/// or vectors from the ndarray crate.
+///
 ///
 mod quaternion;
 

@@ -2,7 +2,7 @@ use num_traits::{Float, One, Zero};
 
 use std::fmt;
 
-/// Quaternion to represent rotations of 3D vectors
+/// Quaternion representing rotations of 3D vectors
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Quaternion<T>
 where
