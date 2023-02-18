@@ -109,6 +109,23 @@ impl Quaternion {
         })
     }
 
+    #[staticmethod]
+    fn from_dcm(dcm: np::PyReadonlyArray2<f64>) -> PyResult<Self> {
+        let dims = dcm.dims();
+        if dims[0] != 3 || dims[1] != 3 {
+            return Err(pyo3::exceptions::PyValueError::new_err("Input must be 3x3"));
+        }
+        let raw = dcm.as_slice().unwrap();
+
+        Ok(Quaternion {
+            inner: Quat::from_ldcm(&[
+                [raw[0], raw[1], raw[2]],
+                [raw[3], raw[4], raw[5]],
+                [raw[6], raw[7], raw[8]],
+            ]),
+        })
+    }
+
     /// Return Quaternion that rotates  from input vector v1 to input vector v2
     #[staticmethod]
     fn qv1tov2(v1: np::PyReadonlyArray1<f64>, v2: np::PyReadonlyArray1<f64>) -> PyResult<Self> {
@@ -291,7 +308,7 @@ impl Quaternion {
 }
 
 #[pymodule]
-pub fn quaternion(_py: Python, m: &PyModule) -> PyResult<()> {
+pub fn qrotate(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<Quaternion>()?;
     Ok(())
 }

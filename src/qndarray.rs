@@ -99,6 +99,40 @@ where
     pub fn rdcm_ndarr(&self) -> ndarray::Array2<T> {
         ndarray::arr2(self.rdcm().as_slice())
     }
+
+    /// Create quaternion from DCM represended as ndarray
+    /// where DCM left-multiplies row matrix
+    pub fn from_ldcm_ndarr(dcm: &ndarray::Array2<T>) -> crate::QuaternionResult<Self> {
+        let (rows, cols) = dcm.dim();
+        if rows != 3 || cols != 3 {
+            return Err(crate::QuaternionError::new("Invalid shape"));
+        }
+        let raw = dcm.as_slice().unwrap();
+        // Can't think of a better way to do this,
+        // but I'm sure there is one
+        Ok(Quaternion::from_ldcm(&[
+            [raw[0], raw[1], raw[2]],
+            [raw[3], raw[4], raw[5]],
+            [raw[6], raw[7], raw[8]],
+        ]))
+    }
+
+    /// Create quaternion from DCM represended as ndarray
+    /// where DCM right-multiplies column matrix
+    pub fn from_rdcm_ndarr(dcm: &ndarray::Array2<T>) -> crate::QuaternionResult<Self> {
+        let (rows, cols) = dcm.dim();
+        if rows != 3 || cols != 3 {
+            return Err(crate::QuaternionError::new("Invalid shape"));
+        }
+        let raw = dcm.as_slice().unwrap();
+        // Can't think of a better way to do this,
+        // but I'm sure there is one
+        Ok(Quaternion::from_rdcm(&[
+            [raw[0], raw[1], raw[2]],
+            [raw[3], raw[4], raw[5]],
+            [raw[6], raw[7], raw[8]],
+        ]))
+    }
 }
 
 #[cfg(test)]
@@ -137,6 +171,11 @@ mod tests {
             let r2 = q.ldcm_ndarr().dot(&arr);
             let r3 = arr.dot(&q.rdcm_ndarr());
 
+            let q2 = Quaternion::from_ldcm_ndarr(&q.ldcm_ndarr()).unwrap();
+            let q3 = Quaternion::from_rdcm_ndarr(&q.rdcm_ndarr()).unwrap();
+            let r4 = q2 * arr.clone();
+            let r5 = q3 * arr.clone();
+
             // Verify that results are the same
             (r1.clone() - r2)
                 .iter()
@@ -144,7 +183,12 @@ mod tests {
             (r1.clone() - r3)
                 .iter()
                 .for_each(|x| assert!(x.abs() < 1.0e-8));
-
+            (r1.clone() - r4)
+                .iter()
+                .for_each(|x| assert!(x.abs() < 1.0e-8));
+            (r1.clone() - r5)
+                .iter()
+                .for_each(|x| assert!(x.abs() < 1.0e-8));
             idx = idx + 1;
         }
     }

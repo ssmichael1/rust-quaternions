@@ -18,6 +18,7 @@ pub mod qndarray;
 pub mod qnumpy;
 
 pub use quaternionerror::QuaternionError;
+pub use quaternionerror::QuaternionResult;
 
 pub use quaternion::Quaternion;
 pub use quaternion::Vec3;

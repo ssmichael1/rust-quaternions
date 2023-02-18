@@ -27,7 +27,7 @@ pyo3 = {version="0.18.1", features=["extension-module"], optional=true}
 rand = "0.8.5"
 
 [features]
-default = ["ndarray"]
+default = ["python"]
 ndarray = ["dep:ndarray"]
 python = ["dep:ndarray", "dep:numpy", "dep:pyo3"]
 

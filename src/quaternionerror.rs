@@ -24,3 +24,5 @@ impl QuaternionError {
         }
     }
 }
+
+pub type QuaternionResult<T> = Result<T, QuaternionError>;
