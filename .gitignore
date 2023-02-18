@@ -2,3 +2,4 @@ target
 Cargo.lock
 *.so
 .vscode
+python/__pycache__
